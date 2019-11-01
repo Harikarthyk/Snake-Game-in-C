@@ -1,236 +1,159 @@
-
-/*  ********************** SNAKE GAME using C Program ******************* */
-
-		    /********** CREDITS - Hari *********** */
-
+//Snake Game -using DLL.
 #include<stdio.h>
 #include<conio.h>
-#include<stdlib.h>
-#define RC 191
-#define VL 179
-#define RB 217
-#define LC 218
-#define LB 192
-#define F 196
-#define S 124
-#define SQ 219
-#define R 19712
-#define L 19200
-#define U 18432
-#define D 20480
-struct node
+#define Right 19712
+#define Left 19200
+#define Up 18432
+#define Down 20480
+#define Food 1
+#define SBody 219
+int fc , fr , count=-1 , k ;
+struct Snake
 {
-	struct node *pre;
-	struct node *next;
-	int r ;
-	int c;
+   //Sc-SnakeColumn and Sr-SnakeRow.
+   int Sr , Sc ;
+   struct Snake *next , *pre;
 };
-int r,c,fr,fc;
-struct node *start;
-struct node *end;
-struct node* Create_Node(int col , int row)
+struct Snake *Head=NULL , *Tail=NULL;
+void createSnake(int row , int col)
 {
-	struct node * newNode;
-	newNode=(struct node*)malloc(sizeof(struct node));
-	newNode->pre=NULL;
-	newNode->next=NULL;
-	newNode->r=row;
-	newNode->c=col;
-	return newNode;
+   struct Snake *newNode=(struct Snake*)malloc(sizeof(struct Snake));
+   newNode->Sc=col;
+   newNode->Sr=row;
+   newNode->next=NULL;
+   if(Head==NULL)
+   {
+      Tail=newNode;
+      Head=newNode;
+   }
+   else
+   {
+      //Insertion at End.
+      newNode->next=Head;
+      Head->pre=newNode;
+      Head=newNode;
+   }
 }
-void DLL(int col , int row)
+void DeleteBut()
 {
-	struct node  *newNode ;
-	newNode=Create_Node(col , row);
-	if(start==NULL)
-	{
+   //Deleting at End.
+   Tail=Tail->pre;
+   Tail->next=NULL;
+}
+void PrintSnake()
+{
+   struct Snake *tptr;
+   clrscr();
+   //Displaying Snake.
+   for(tptr=Head;tptr!=NULL;tptr=tptr->next)
+   {
+       gotoxy(tptr->Sc,tptr->Sr);
+       printf("%c",SBody);
+   }
+   gotoxy(fc,fr);
+   printf("%c",Food);
+}
+void FoodCreation()
+{
+    struct Snake *tptr;
+    //To Generate Food in random positions.
+    fc=rand() % 78 ;
+    fr=rand() % 23 ;
+    for(tptr=Head;tptr!=NULL;tptr=tptr->next)
+    {
+       //to avoid Food to be Generated in Snake's Position.
+       if(tptr->Sr==fr && tptr->Sc==fc)
+	  FoodCreation();
+    }
+    count++;
+}
+void CheckRestriction()
+{
+   //Checking out-of-bound and conditions.
+   struct Snake *tptr , *tptr1;
+   for(tptr=Head;tptr!=NULL;tptr=tptr->next)
+   {
+       for(tptr1=tptr->next;tptr1!=NULL;tptr1=tptr1->next)
+       {
+	   if((tptr->Sc==tptr1->Sc && tptr->Sr==tptr1->Sr) ||((Head->Sc==80 || Head->Sr==24 || Head->Sc==0 || Head->Sr==0)))
+	   {
+	       k=283;
+	       clrscr();
+	       gotoxy(37,12);
+	       printf("Out");
+	       delay(350);
+	       break;
+	   }
+       }
+   }
+}
+void main()
+{
+   clrscr();
 
-		start=newNode;
-		end=newNode;
-	}
-	else
+   createSnake(11,33);
+   createSnake(11,34);
+   createSnake(11,35);
+   createSnake(Head->Sr , (Head->Sc + 1));
+   FoodCreation();
+   PrintSnake();
+   do
+   {
+	//bioskey is to know the key pressed.
+	k=(bioskey(0));
+	switch(k)
 	{
-		end->next=newNode;
-		newNode->pre=end;
-		end = newNode;
+	   case Right:
+	   {
+	      createSnake(Head->Sr , (Head->Sc + 1));
+	      DeleteBut();
+	      if(Head->Sr==fr && Head->Sc==fc)
+	      {
+		  FoodCreation();
+		  createSnake(Head->Sr , (Head->Sc + 1));
+	      }
+	      break;
+	   }
+	   case Left:
+	   {
+	      createSnake(Head->Sr , (Head->Sc - 1));
+	      DeleteBut();
+	      if(Head->Sr==fr && Head->Sc==fc)
+	      {
+		  FoodCreation();
+		  createSnake(Head->Sr , (Head->Sc - 1));
+	      }
+	      break;
+	   }
+	   case Up:
+	   {
+	      createSnake((Head->Sr - 1) , Head->Sc);
+	      DeleteBut();
+	      if(Head->Sr==fr && Head->Sc==fc)
+	      {
+		  FoodCreation();
+		  createSnake((Head->Sr - 1) , Head->Sc);
+	      }
+	      break;
+	   }
+	   case Down:
+	   {
+	      createSnake((Head->Sr + 1), Head->Sc);
+	      DeleteBut();
+	      if(Head->Sr==fr && Head->Sc==fc)
+	      {
+		  FoodCreation();
+		  createSnake((Head->Sr + 1) , Head->Sc);
+	      }
+	   }
 	}
-	r=end->r;
-	c=end->c;
-}
-void Draw_Box()
-{
-	int ctr, x=1 ,y=2;
-	textcolor(WHITE);
-	cprintf("%c",LC);
-	for(ctr=0;ctr<79;ctr++)
-		cprintf("%c",F);
-	for(ctr=0;ctr<23;ctr++,y++)
-	{
-		cprintf("%c",VL);
-		gotoxy(x,y) ;
-	}
-	printf("%c",LB);
-	for(ctr=0;ctr<78;ctr++,x++)
-		cprintf("%c",F);
-	cprintf("%c",RB);
-	gotoxy(80,23);
-	y = 23;
-	x = 80;
-	for(ctr=0;ctr<23;ctr++,y--)
-	{
-		cprintf("%c",VL);
-		gotoxy(x,y);
-	}
-	cprintf("%c",RC);
-	for(ctr=2;ctr<80;ctr++)
-	{
-	gotoxy(ctr,3);
-	cprintf("%c",F);
-	}
-
-}
-void Delete_DLL()
-{
-	struct node *safe;
-	gotoxy(start->c,start->r);
-	printf(" ");
-	safe=start;
-	start=start->next;
-	free(safe);
-}
-int count=0;
-void display()
-{
-	struct node *tptr;
-	textcolor(WHITE);
-	for(tptr=start;tptr!=NULL;tptr=tptr->next)
-	{
-		gotoxy(tptr->c,tptr->r);
-		cprintf("%c",219);
-	}
-	gotoxy(42,2);
-	textcolor(YELLOW);
-	cprintf("SNAKE GAME");
-	textcolor(BLUE);
-	gotoxy(69,2);
-	cprintf("SCORE: %d",count);
-
-}
-int RF , LF , UF , DF;
-void Food_Creation()
-{
-	struct node*tptr;
-	randomize();
-	fc = rand()%68+6;
-	fr = rand()%18+5;
-	gotoxy(fc,fr);
-	textcolor(YELLOW);
-	cprintf("%c",2);
-	count++;
-}
-void move()
-{
-	int key;
-	struct node*tptr;
-	struct node*shadow;
-	shadow=NULL;
-	do
-	{
-	while(bioskey(1) == 0);
-	key = (bioskey(0));
-	switch(key)
-	{
-		case R :
-		  if(RF == 0)
-		{
-		  DLL(++c,r);
-		  Delete_DLL();
-		  if(fc==c && fr==r)
-			{
-				DLL(++c,r);
-				Food_Creation();
-			}
-			LF=1;
-			UF=DF=0;
-		}
-		break;
-		case L:
-		  if(LF==0)
-		  {
-			DLL(--c,r);
-			Delete_DLL();
-			if(fc==c && fr==r)
-			{
-				DLL(--c,r);
-				Food_Creation();
-			}
-			RF=1;
-			DF=UF=0;
-		   }
-		   break;
-		case U :
-		   if(UF==0)
-		   {
-			DLL(c,--r);
-			Delete_DLL();
-			if(fc==c && fr==r)
-			{
-				DLL(c,--r);
-				Food_Creation();
-			}
-			RF=LF=0;
-			DF=1;
-		   }
-		   break;
-		case D:
-		   if(DF==0 )
-		   {
-			DLL(c,++r);
-			Delete_DLL();
-			if(fc==c && fr==r )
-			{
-				Food_Creation();
-				DLL(c,++r);
-			}
-			UF=1;
-			RF=LF=0;
-		   }
-		   break;
-	}
-	if(end->r==3 || end->c==2 || end->r==23  || end->c==79)
-	{
-		key=283;
-		break;
-	}
-	for(tptr=start; (end->r != tptr->r && end->c!=tptr->c) ;tptr=tptr->next)
-	{
-		if(end->r==tptr->r && end->c==end->r)
-	key=283;
-	}
-	display();
-	}while(key != 283);
-}
-int main()
-{
-	clrscr();
-	Draw_Box();
-	DLL(3,9);
-	DLL(4,9);
-	DLL(5,9);
-	display();
-	Food_Creation();
-	move();
-	clrscr();
-	textcolor(WHITE);
-	textbackground(RED);
-	gotoxy(33,10);
-	cprintf("*****OUT*****");
-	gotoxy(33,12);
-	cprintf("SCORE : ' %d '",count);
-	gotoxy(27,14);
-	cprintf("*** PRESS ANY TO EXIT ***");
-	gotoxy(77,20);
-	cprintf("############## - BY HARI ");
-	getch();
-	return 0;
+	CheckRestriction();
+	PrintSnake();
+   //if k=283 Game Quits -(If we press Esc or when we go wrong).
+   }while(k!=283);
+   clrscr();
+   //Display the Final Result.
+   gotoxy(32,12);
+   printf("Your Score = %d",count);
+   getch();
 }
