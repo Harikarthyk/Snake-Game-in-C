@@ -6,6 +6,7 @@ Sample Ouput:
 
 ![Snake_Game](https://raw.githubusercontent.com/Harikarthyk/Snake-Game-in-C/master/snake.png)
  
+
 ![Snake_Game](https://raw.githubusercontent.com/Harikarthyk/Snake-Game-in-C/master/snake1.png)
 
 ![Snake_Game](https://raw.githubusercontent.com/Harikarthyk/Snake-Game-in-C/master/snake3.png)
